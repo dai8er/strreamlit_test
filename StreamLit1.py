@@ -1,7 +1,14 @@
 ﻿import streamlit as st
 import pandas as pd
 import numpy as np
+from io import BytesIO
 from datetime import datetime
+
+def download_excel(df, filename):
+    buffer = BytesIO()
+    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    return buffer.getvalue()
 
 # Загрузка файла
 uploaded_file = st.file_uploader("Choose a file")
@@ -48,14 +55,21 @@ if uploaded_file is not None:
     # Формируйте название файла, используя сегодняшнюю дату
     file_name = f'ЗРА из dwg {today_date}.xlsx'
 
-    df2.to_excel(file_name, index=False)
+    #df2.to_excel(file_name, index=False)
 
     # Сохранение датафрейма в новый файл Excel
 
     st.write(f"Файл {file_name} успешно сохранен!")
-    user_input = st.text_input("Введите текст:")
-    st.write("Вы ввели:", user_input)
 
-    if st.button("Нажми меня"):
-        st.write("Кнопка нажата!")
+
+
+    excel_bytes = download_excel(df2, 'data.xlsx')
+
+    st.download_button(
+        label="Скачать Excel-файл",
+        data=excel_bytes,
+        file_name=file_name,
+        mime="application/vnd.ms-excel",)
+
+
 
